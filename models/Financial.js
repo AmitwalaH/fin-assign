@@ -10,6 +10,7 @@ const financialSchema = new mongoose.Schema(
     amount: {
       type: Number,
       required: true,
+      min: 0,
     },
     type: {
       type: String,
@@ -31,6 +32,7 @@ const financialSchema = new mongoose.Schema(
     date: {
       type: Date,
       default: Date.now,
+      index: true,
     },
     description: {
       type: String,
