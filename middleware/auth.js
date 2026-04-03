@@ -1,7 +1,7 @@
-import jwt from "jsonwebtoken";
-import User from "./models/User.js";
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-// Middleware to protect routes by verifying JWTs
+// Middleware to protect routes
 const protect = async (req, res, next) => {
   let token;
 
@@ -14,17 +14,40 @@ const protect = async (req, res, next) => {
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      req.user = await User.findById(decoded.id).select("-password");
+      const user = await User.findById(decoded._id).select("-password");
+
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      if (user.status === "inactive") {
+        return res.status(403).json({
+          success: false,
+          message: "User is inactive",
+        });
+      }
+
+      req.user = user;
+
       next();
     } catch (error) {
       console.error("JWT verification failed:", error);
-      return res.status(401).json({ error: "Not authorized, token failed." });
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, token failed",
+      });
     }
   }
 
   if (!token) {
-    return res.status(401).json({ error: "Not authorized, no token." });
+    return res.status(401).json({
+      success: false,
+      message: "Not authorized, no token",
+    });
   }
 };
 
-export { protect };
+module.exports = { protect };
