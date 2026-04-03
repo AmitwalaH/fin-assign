@@ -51,3 +51,6 @@ const getSummary = async (req, res) => {
     });
   }
 };
+
+
+module.exports = { getSummary };
